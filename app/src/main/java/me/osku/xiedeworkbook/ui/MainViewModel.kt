@@ -44,6 +44,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadSettings()
         loadPracticeBooks()
         initializeBuiltInBooks()
+        // 初始化注音字典
+        initializeZhuyinDict()
     }
 
     private fun loadSettings() {
@@ -68,8 +70,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (existingBooks.none { it.isBuiltIn }) {
                 val builtInBooks = listOf(
                     PracticeBook(
-                        name = "常用字1000",
-                        content = "的一是在不了有和人這中大為上個國我以要他時來用們生到作地於出就分對成會可主發年動同工也能下過子說產種面而方後多定行學法所民本者立向世路級進長少年光從把先然如此心件於前表文問現代小民水理什天手日平想電話內數量達走向使風雨",
+                        name = "常用字",
+                        content = "的一是在不了有和���這中大為上個國我以要他時來用們生到作地於出就分對成會可主發年動同工也能下過子說產種面而方後多定行學法所民本者立向世路級進長少年光從把先然如此心件於前表文問現代小民水理什天手日平想電話內數量達走向使風雨",
                         isBuiltIn = true
                     ),
                     PracticeBook(
@@ -86,6 +88,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val allBooks = existingBooks + builtInBooks
                 savePracticeBooks(allBooks)
             }
+        }
+    }
+
+    private fun initializeZhuyinDict() {
+        viewModelScope.launch {
+            me.osku.xiedeworkbook.utils.ZhuyinDict.load(getApplication())
         }
     }
 

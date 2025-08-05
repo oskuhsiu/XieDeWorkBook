@@ -34,7 +34,8 @@ class SettingsRepository(private val context: Context) {
                 GridStyle.valueOf(prefs.getString("grid_style", GridStyle.RICE_GRID.name) ?: GridStyle.RICE_GRID.name)
             } catch (e: Exception) {
                 GridStyle.RICE_GRID
-            }
+            },
+            showZhuyin = prefs.getBoolean("show_zhuyin", false)
         )
     }
 
@@ -47,6 +48,7 @@ class SettingsRepository(private val context: Context) {
             putFloat("multi_char_grid_size", settings.multiCharGridSize)
             putString("font_type", settings.fontType)
             putString("grid_style", settings.gridStyle.name)
+            putBoolean("show_zhuyin", settings.showZhuyin)
             apply()
         }
         _practiceSettings.value = settings

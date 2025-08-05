@@ -68,9 +68,11 @@ fun PracticeCanvas(
                                     drawingState.startPath(id.toInt(), change.position)
                                     onDrawingInteraction()
                                 }
+
                                 change.pressed && change.previousPressed -> {
                                     drawingState.appendToPath(id.toInt(), change.position)
                                 }
+
                                 !change.pressed && change.previousPressed -> {
                                     drawingState.endPath(id.toInt())
                                 }
@@ -184,29 +186,72 @@ private fun DrawScope.drawSingleCharacterGrid(
 ) {
     val centerX = size.width / 2
     val centerY = size.height / 2
-    val gridLeft = centerX - gridSize / 2
-    val gridTop = centerY - gridSize / 2
 
-    // 繪製外框
+    // 計算注音格子的寬度（主格子的25-30%）
+    val zhuyinWidth = if (settings.showZhuyin) gridSize * 0.28f else 0f
+    val totalWidth = gridSize + zhuyinWidth
+
+    // 檢查總寬度是否超出螢幕，如果超出則縮小主格子
+    val maxAvailableWidth = size.width * 0.9f // 預留10%邊距
+    val actualGridSize = if (totalWidth > maxAvailableWidth && settings.showZhuyin) {
+        // 重新計算主格子大小，確保總寬度不超出螢幕
+        val adjustedMainGridSize = maxAvailableWidth / 1.28f // 1.28 = 1 + 0.28 (注音格比例)
+        adjustedMainGridSize
+    } else {
+        gridSize
+    }
+
+    // 重新計算注音格子寬度
+    val actualZhuyinWidth = if (settings.showZhuyin) actualGridSize * 0.28f else 0f
+    val actualTotalWidth = actualGridSize + actualZhuyinWidth
+
+    // 調整主格子的位置，讓整體居中
+    val mainGridLeft = centerX - actualTotalWidth / 2
+    val mainGridTop = centerY - actualGridSize / 2
+    val zhuyinGridLeft = mainGridLeft + actualGridSize
+
+    // 繪製主格子外框
     drawRect(
         color = Color.Black,
-        topLeft = Offset(gridLeft, gridTop),
-        size = Size(gridSize, gridSize),
+        topLeft = Offset(mainGridLeft, mainGridTop),
+        size = Size(actualGridSize, actualGridSize),
         style = Stroke(width = 2.dp.toPx())
     )
 
-    // 繪製格線
+    // 繪製主格子格線
     drawGridLines(
-        left = gridLeft,
-        top = gridTop,
-        size = gridSize,
+        left = mainGridLeft,
+        top = mainGridTop,
+        size = actualGridSize,
         style = settings.gridStyle
     )
+
+    // 繪製注音格子（如果啟用且寬度有效）
+    if (settings.showZhuyin && character.isNotEmpty() && actualZhuyinWidth > 0) {
+        // 繪製注音格子外框
+        drawRect(
+            color = Color.Black,
+            topLeft = Offset(zhuyinGridLeft, mainGridTop),
+            size = Size(actualZhuyinWidth, actualGridSize),
+            style = Stroke(width = 1.5.dp.toPx())
+        )
+
+        // 繪製注音
+        drawZhuyinInGrid(
+            character = character.firstOrNull() ?: ' ',
+            left = zhuyinGridLeft,
+            top = mainGridTop,
+            width = actualZhuyinWidth,
+            height = actualGridSize,
+            textMeasurer = textMeasurer,
+            density = density
+        )
+    }
 
     // 繪製底字（淡灰色）
     if (character.isNotEmpty()) {
         val textStyle = TextStyle(
-            fontSize = (gridSize * 0.6f / density.density).sp,
+            fontSize = (actualGridSize * 0.6f / density.density).sp,
             fontFamily = FontFamily.Serif,
             color = Color.Gray.copy(alpha = 0.3f)
         )
@@ -220,8 +265,8 @@ private fun DrawScope.drawSingleCharacterGrid(
             text = character,
             style = textStyle,
             topLeft = Offset(
-                centerX - textWidth / 2,
-                centerY - textHeight / 2
+                mainGridLeft + actualGridSize / 2 - textWidth / 2,
+                mainGridTop + actualGridSize / 2 - textHeight / 2
             )
         )
     }
@@ -335,6 +380,7 @@ private fun DrawScope.drawGridLines(
                 strokeWidth = strokeStyle.width
             )
         }
+
         GridStyle.NINE_GRID -> {
             // 九宮格：3x3網格
             // 垂直線
@@ -364,5 +410,92 @@ private fun DrawScope.drawGridLines(
                 strokeWidth = strokeStyle.width
             )
         }
+    }
+}
+
+/**
+ * 在注音格子中繪製注音符號
+ */
+private fun DrawScope.drawZhuyinInGrid(
+    character: Char,
+    left: Float,
+    top: Float,
+    width: Float,
+    height: Float,
+    textMeasurer: androidx.compose.ui.text.TextMeasurer,
+    density: androidx.compose.ui.unit.Density
+) {
+    // 檢查格子尺寸是否有效
+    if (width <= 0 || height <= 0) return
+
+    // 獲取注音
+    val zhuyin = me.osku.xiedeworkbook.utils.ZhuyinDict.getZhuyin(character)
+    if (zhuyin.isEmpty()) return
+
+    // 解析注音組件
+    val zhuyinComponents = me.osku.xiedeworkbook.utils.parseZhuyinWithTones(zhuyin)
+    if (zhuyinComponents.isEmpty()) return
+
+    // 計算字體大小，根據格子尺寸調整
+    val baseFontSize = minOf(width, height) * .8f // 使用較小的尺寸作為基準
+    val fontSize = maxOf(baseFontSize, 8f) // 最小字體大小為8
+
+    // 計算注音的垂直佈局
+    val maxY = zhuyinComponents.maxOfOrNull { it.y } ?: 0f
+    val minY = zhuyinComponents.minOfOrNull { it.y } ?: 0f
+    val totalHeight = (maxY - minY + 1) * fontSize * 1.2f
+    val startY = top + (height - totalHeight) / 2 + fontSize
+
+    // 計算水平居中位置
+    val centerX = left + width / 2
+
+    // 繪製每個注音組件
+    zhuyinComponents.forEach { component ->
+        val xPosition = centerX + component.x * fontSize * 0.3f // 減小水平偏移
+        val yPosition = startY + (component.y - minY) * fontSize * 1.2f
+
+        // 確保位置在格子範圍內
+        if (xPosition < left || xPosition > left + width ||
+            yPosition < top || yPosition > top + height
+        ) {
+            return@forEach
+        }
+
+        val actualFontSize = /*if (component.isTone) fontSize * 0.8f else*/ fontSize
+        val textStyle = TextStyle(
+            fontSize = (actualFontSize / density.density).sp,
+            fontFamily = FontFamily.Default,
+            color = Color.Blue.copy(alpha = 0.8f)
+        )
+
+        // 測量文字尺寸，確保不會超出格子範圍
+        val textLayoutResult = textMeasurer.measure(component.char.toString(), textStyle)
+        val textWidth = textLayoutResult.size.width
+        val textHeight = textLayoutResult.size.height
+
+        // 檢查文字尺寸是否有效
+        if (textWidth <= 0 || textHeight <= 0) return@forEach
+
+        // 計算最終繪製位置，確保文字完全在格子內
+        val maxX = maxOf(left, left + width - textWidth)
+        val maxY = maxOf(top, top + height - textHeight)
+
+        val finalX = (xPosition - textWidth / 2).coerceIn(left, maxX)
+        val finalY = (yPosition - textHeight / 2).coerceIn(top, maxY)
+
+        // 再次檢查最終位置是否有效
+        if (finalX < left || finalY < top ||
+            finalX + textWidth > left + width ||
+            finalY + textHeight > top + height
+        ) {
+            return@forEach
+        }
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = component.char.toString(),
+            style = textStyle,
+            topLeft = Offset(finalX, finalY)
+        )
     }
 }

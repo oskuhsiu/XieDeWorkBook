@@ -140,6 +140,23 @@ fun SettingsScreen(
                         )
                     }
                 }
+
+                // 注音顯示設定
+                SettingItem(title = "注音顯示") {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Switch(
+                            checked = tempSettings.showZhuyin,
+                            onCheckedChange = { tempSettings = tempSettings.copy(showZhuyin = it) }
+                        )
+                        Text(
+                            text = if (tempSettings.showZhuyin) "顯示注音" else "隱藏注音",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             }
 
             // 外觀設定

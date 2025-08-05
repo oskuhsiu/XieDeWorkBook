@@ -88,6 +88,9 @@ private fun ManualInputTab(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var bookName by remember { mutableStateOf("") }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -116,22 +119,47 @@ private fun ManualInputTab(
             shape = RoundedCornerShape(12.dp)
         )
 
-        Button(
-            onClick = {
-                if (viewModel.manualInputText.isNotBlank()) {
-                    viewModel.startManualPractice(viewModel.manualInputText)
-                }
-            },
-            enabled = viewModel.manualInputText.isNotBlank(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(12.dp)
+        // 按鈕區域
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "開始練習",
-                style = MaterialTheme.typography.titleMedium
-            )
+            // 儲存按鈕
+            Button(
+                onClick = { showSaveDialog = true },
+                enabled = viewModel.manualInputText.isNotBlank(),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Text(
+                    text = "儲存練習簿",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+
+            // 開始練習按鈕
+            Button(
+                onClick = {
+                    if (viewModel.manualInputText.isNotBlank()) {
+                        viewModel.startManualPractice(viewModel.manualInputText)
+                    }
+                },
+                enabled = viewModel.manualInputText.isNotBlank(),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "開始練習",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
         }
 
         // 字數統計
@@ -142,6 +170,61 @@ private fun ManualInputTab(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+
+    // 儲存對話框
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showSaveDialog = false
+                bookName = ""
+            },
+            title = {
+                Text("儲存練習簿")
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "為您的練習簿命名：",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    OutlinedTextField(
+                        value = bookName,
+                        onValueChange = { bookName = it },
+                        placeholder = {
+                            Text("例如：唐詩選、生字練習...")
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (bookName.isNotBlank()) {
+                            viewModel.saveCustomBook(bookName, viewModel.manualInputText)
+                            showSaveDialog = false
+                            bookName = ""
+                        }
+                    },
+                    enabled = bookName.isNotBlank()
+                ) {
+                    Text("儲存")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showSaveDialog = false
+                        bookName = ""
+                    }
+                ) {
+                    Text("取消")
+                }
+            }
+        )
     }
 }
 

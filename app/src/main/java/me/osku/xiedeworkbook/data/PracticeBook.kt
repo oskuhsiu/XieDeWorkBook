@@ -27,7 +27,8 @@ data class PracticeSettings(
     val singleCharGridSize: Float = 200f, // 單字模式格子大小
     val multiCharGridSize: Float = 120f, // 多字模式格子大小
     val fontType: String = "KaiTi", // 字型類型
-    val gridStyle: GridStyle = GridStyle.RICE_GRID // 格線樣式
+    val gridStyle: GridStyle = GridStyle.RICE_GRID, // 格線樣式
+    val showZhuyin: Boolean = false // 是否顯示注音
 )
 
 /**

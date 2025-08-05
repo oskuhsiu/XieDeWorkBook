@@ -1,0 +1,46 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- 左頁 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#333333"
+        android:strokeWidth="1"
+        android:pathData="M8,12 Q12,8 24,12 Q36,8 40,12 L40,36 Q36,40 24,36 Q12,40 8,36 Z" />
+
+    <!-- 右頁 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#333333"
+        android:strokeWidth="1"
+        android:pathData="M24,12 Q36,8 40,12 L40,36 Q36,40 24,36 Z" />
+
+    <!-- 書脊 -->
+    <path
+        android:strokeColor="#333333"
+        android:strokeWidth="1"
+        android:fillColor="#00000000"
+        android:pathData="M24,12 L24,36" />
+
+    <!-- 中文「學」字簡化形狀 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M18,22 L30,22 M24,18 L24,30 M20,26 L28,26 M22,28 L26,28" />
+
+    <!-- 筆身 -->
+    <path
+        android:fillColor="#FFD700"
+        android:strokeColor="#333333"
+        android:strokeWidth="1"
+        android:pathData="M34,38 L40,44 L42,42 L36,36 Z" />
+
+    <!-- 筆尖 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M40,44 L42,42 L43,43 L41,45 Z" />
+
+</vector>
+
