@@ -61,6 +61,7 @@ fun PracticeCanvas(
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent()
+                        // 多點觸控：每個觸控點都處理
                         event.changes.forEach { change ->
                             val id = change.id.value
                             when {
@@ -68,11 +69,9 @@ fun PracticeCanvas(
                                     drawingState.startPath(id.toInt(), change.position)
                                     onDrawingInteraction()
                                 }
-
                                 change.pressed && change.previousPressed -> {
                                     drawingState.appendToPath(id.toInt(), change.position)
                                 }
-
                                 !change.pressed && change.previousPressed -> {
                                     drawingState.endPath(id.toInt())
                                 }
@@ -95,18 +94,19 @@ fun PracticeCanvas(
             val availableWidth = size.width - (sideMargin * 2)
             val availableHeight = size.height - topMargin - bottomMargin
 
-            // 計算能容納的行列數（考慮格子間距）
-            val maxCharsPerRow = if (availableWidth > 0) {
-                ((availableWidth + spacing) / (gridSizePx + spacing)).toInt().coerceAtLeast(1)
-            } else 1
-
+            // 對於中文直式排列：先計算列數（垂直方向），再計算行數（水平方向）
             val maxRows = if (availableHeight > 0) {
                 ((availableHeight + spacing) / (gridSizePx + spacing)).toInt().coerceAtLeast(1)
             } else 1
 
-            val charsPerPage = maxCharsPerRow * maxRows
+            val maxCols = if (availableWidth > 0) {
+                ((availableWidth + spacing) / (gridSizePx + spacing)).toInt().coerceAtLeast(1)
+            } else 1
 
-            LayoutInfo(maxCharsPerRow, maxRows, charsPerPage)
+            val charsPerPage = maxRows * maxCols
+
+            // 注意：這裡的 maxCharsPerRow 實際上是 maxCharsPerCol（每列最大字數）
+            LayoutInfo(maxRows, maxCols, charsPerPage)
         } else {
             LayoutInfo(1, 1, 1) // 單字模式
         }
@@ -280,17 +280,24 @@ private fun DrawScope.drawMultiCharacterGrid(
     gridSize: Float,
     settings: PracticeSettings,
     textMeasurer: androidx.compose.ui.text.TextMeasurer,
-    maxCharsPerRow: Int,
+    maxCharsPerRow: Int, // 這裡實際上是 maxRows（每列最大字數）
     density: androidx.compose.ui.unit.Density
 ) {
     val spacing = 20.dp.toPx()
-    val totalWidth = maxCharsPerRow * gridSize + (maxCharsPerRow - 1) * spacing
+    // 根據新的佈局邏輯重新計算
+    val maxRows = maxCharsPerRow // 每列最大字數
+    val maxCols = if (characters.isNotEmpty()) {
+        (characters.size + maxRows - 1) / maxRows // 需要的列數
+    } else 1
+
+    val totalWidth = maxCols * gridSize + (maxCols - 1) * spacing
     val startX = (size.width - totalWidth) / 2
     val startY = 50.dp.toPx()
 
     characters.forEachIndexed { index, character ->
-        val row = index / maxCharsPerRow
-        val col = index % maxCharsPerRow
+        // 中文直式排列：先填滿第一列，再填第二列
+        val col = index / maxRows  // 第幾列
+        val row = index % maxRows  // 列內第幾個
 
         val left = startX + col * (gridSize + spacing)
         val top = startY + row * (gridSize + spacing)

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.osku.xiedeworkbook.data.PracticeBook
 import me.osku.xiedeworkbook.ui.MainViewModel
+import me.osku.xiedeworkbook.ui.startRandomPractice
 
 /**
  * 內容選擇頁面
@@ -120,45 +121,68 @@ private fun ManualInputTab(
         )
 
         // 按鈕區域
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 儲存按鈕
+            // 隨機按鈕
             Button(
-                onClick = { showSaveDialog = true },
-                enabled = viewModel.manualInputText.isNotBlank(),
+                onClick = { viewModel.generateRandomCharacters() },
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    containerColor = MaterialTheme.colorScheme.tertiary
                 )
             ) {
                 Text(
-                    text = "儲存練習簿",
+                    text = "隨機",
                     style = MaterialTheme.typography.titleSmall
                 )
             }
 
-            // 開始練習按鈕
-            Button(
-                onClick = {
-                    if (viewModel.manualInputText.isNotBlank()) {
-                        viewModel.startManualPractice(viewModel.manualInputText)
-                    }
-                },
-                enabled = viewModel.manualInputText.isNotBlank(),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp)
+            // 原有的按鈕區域
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "開始練習",
-                    style = MaterialTheme.typography.titleSmall
-                )
+                // 儲存按鈕
+                Button(
+                    onClick = { showSaveDialog = true },
+                    enabled = viewModel.manualInputText.isNotBlank(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Text(
+                        text = "儲存練習簿",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+
+                // 開始練習按鈕
+                Button(
+                    onClick = {
+                        if (viewModel.manualInputText.isNotBlank()) {
+                            viewModel.startManualPractice(viewModel.manualInputText)
+                        }
+                    },
+                    enabled = viewModel.manualInputText.isNotBlank(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "開始練習",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
             }
         }
 
@@ -301,6 +325,9 @@ private fun BuiltInBooksTab(
             PracticeBookCard(
                 book = book,
                 onStartPractice = { viewModel.startPractice(book) },
+                onStartRandomPractice = if (book.canRandomize) {
+                    { viewModel.startRandomPractice(book) }
+                } else null,
                 onDelete = null,
                 showDeleteButton = false
             )
@@ -315,6 +342,7 @@ private fun BuiltInBooksTab(
 private fun PracticeBookCard(
     book: PracticeBook,
     onStartPractice: () -> Unit,
+    onStartRandomPractice: (() -> Unit)? = null,
     onDelete: (() -> Unit)?,
     showDeleteButton: Boolean,
     modifier: Modifier = Modifier
@@ -368,12 +396,36 @@ private fun PracticeBookCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Button(
-                onClick = onStartPractice,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("開始練習")
+            // 按钮区域
+            if (book.canRandomize && onStartRandomPractice != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onStartPractice,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("開始練習")
+                    }
+
+                    OutlinedButton(
+                        onClick = onStartRandomPractice,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("隨機練習")
+                    }
+                }
+            } else {
+                Button(
+                    onClick = onStartPractice,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("開始練習")
+                }
             }
         }
     }

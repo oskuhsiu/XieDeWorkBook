@@ -1,11 +1,13 @@
 package me.osku.xiedeworkbook.data
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.InternalSerializationApi
 import java.util.UUID
 
 /**
  * 練習簿數據模型
  */
+@OptIn(InternalSerializationApi::class)
 @Serializable
 data class PracticeBook(
     val id: String = UUID.randomUUID().toString(),
@@ -13,12 +15,14 @@ data class PracticeBook(
     val content: String, // 練習內容的字串
     val characters: List<String> = content.toCharArray().map { it.toString() },
     val isBuiltIn: Boolean = false,
+    val canRandomize: Boolean = false, // 是否支持随机选项
     val createdAt: Long = System.currentTimeMillis()
 )
 
 /**
  * 練習模式設定
  */
+@OptIn(InternalSerializationApi::class)
 @Serializable
 data class PracticeSettings(
     val isFingerMode: Boolean = true, // true: 手指模式, false: 觸控筆模式
