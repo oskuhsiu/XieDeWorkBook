@@ -27,9 +27,10 @@ import me.osku.xiedeworkbook.ui.startRandomPractice
 @Composable
 fun ContentSelectionScreen(
     viewModel: MainViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedTab: Int = 0 // 新增 selectedTab 參數，預設為 0
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTabState by remember { mutableIntStateOf(selectedTab) }
     val tabs = listOf("手動輸入", "我的練習簿", "內建練習簿")
 
     Column(
@@ -55,13 +56,13 @@ fun ContentSelectionScreen(
 
         // Tab 選擇器
         TabRow(
-            selectedTabIndex = selectedTab,
+            selectedTabIndex = selectedTabState,
             modifier = Modifier.fillMaxWidth()
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
+                    selected = selectedTabState == index,
+                    onClick = { selectedTabState = index },
                     text = {
                         Text(
                             text = title,
@@ -73,7 +74,7 @@ fun ContentSelectionScreen(
         }
 
         // 內容區域
-        when (selectedTab) {
+        when (selectedTabState) {
             0 -> ManualInputTab(viewModel)
             1 -> MyBooksTab(viewModel)
             2 -> BuiltInBooksTab(viewModel)

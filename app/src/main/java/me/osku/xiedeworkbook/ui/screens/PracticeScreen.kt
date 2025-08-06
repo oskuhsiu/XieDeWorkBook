@@ -9,10 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
@@ -94,27 +92,8 @@ fun PracticeScreen(
             }
         )
 
-        // 主要練習區域
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(8.dp)
-        ) {
-            PracticeCanvas(
-                modifier = Modifier.fillMaxSize(),
-                characters = currentBook.characters,
-                currentPage = viewModel.currentPage,
-                settings = viewModel.practiceSettings,
-                drawingState = drawingState,
-                onLayoutInfoChanged = { layoutInfo ->
-                    currentLayoutInfo = layoutInfo
-                }
-            )
-        }
-
-        // 底部控制列
-        BottomControlBar(
+        // 頂部部控制列
+        TopControlBar(
             onPreviousPage = { viewModel.previousPage() },
             onNextPage = {
                 currentLayoutInfo?.let { layoutInfo ->
@@ -148,14 +127,33 @@ fun PracticeScreen(
                 .fillMaxWidth()
                 .padding(16.dp)
         )
+
+        // 主要練習區域
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(8.dp)
+        ) {
+            PracticeCanvas(
+                modifier = Modifier.fillMaxSize(),
+                characters = currentBook.characters,
+                currentPage = viewModel.currentPage,
+                settings = viewModel.practiceSettings,
+                drawingState = drawingState,
+                onLayoutInfoChanged = { layoutInfo ->
+                    currentLayoutInfo = layoutInfo
+                }
+            )
+        }
     }
 }
 
 /**
- * 底部控制列組件
+ * 頂部控制列組件
  */
 @Composable
-private fun BottomControlBar(
+private fun TopControlBar(
     onPreviousPage: () -> Unit,
     onNextPage: () -> Unit,
     onClear: () -> Unit,

@@ -87,7 +87,7 @@ fun PracticeCanvas(
             val gridSizePx = gridSize.toPx()
             val spacing = 20.dp.toPx()
             val topMargin = 50.dp.toPx()
-            val bottomMargin = 100.dp.toPx()
+            val bottomMargin = 50.dp.toPx()
             val sideMargin = 16.dp.toPx()
 
             // 計算實際可用空間
@@ -251,7 +251,7 @@ private fun DrawScope.drawSingleCharacterGrid(
     // 繪製底字（淡灰色）
     if (character.isNotEmpty()) {
         val textStyle = TextStyle(
-            fontSize = (actualGridSize * 0.6f / density.density).sp,
+            fontSize = (actualGridSize * 0.7f / density.density).sp,
             fontFamily = FontFamily.Serif,
             color = Color.Gray.copy(alpha = 0.3f)
         )
@@ -321,7 +321,7 @@ private fun DrawScope.drawMultiCharacterGrid(
         // 繪製底字
         if (character.isNotEmpty()) {
             val textStyle = TextStyle(
-                fontSize = (gridSize * 0.5f / density.density).sp,
+                fontSize = (gridSize * 0.7f / density.density).sp,
                 fontFamily = FontFamily.Serif,
                 color = Color.Gray.copy(alpha = 0.25f)
             )

@@ -85,7 +85,7 @@ fun XieDeWorkBookApp() {
             PracticeScreen(viewModel = viewModel)
         }
         Screen.MY_BOOKS -> {
-            ContentSelectionScreen(viewModel = viewModel)
+            ContentSelectionScreen(viewModel = viewModel, selectedTab = 1)
         }
     }
 
