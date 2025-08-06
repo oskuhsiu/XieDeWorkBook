@@ -3,7 +3,6 @@ package me.osku.xiedeworkbook.utils
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.osku.xiedeworkbook.R
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -19,7 +18,7 @@ object ZhuyinDict {
 
         withContext(Dispatchers.IO) {
             try {
-                val inputStream = context.resources.openRawResource(R.raw.word4k)
+                val inputStream = context.assets.open("word4k.tsv")
                 val reader = BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8))
                 reader.forEachLine { line ->
                     val parts = line.trim().split('\t')

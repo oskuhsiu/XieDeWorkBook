@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import me.osku.xiedeworkbook.data.*
-import me.osku.xiedeworkbook.R
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import kotlinx.coroutines.Dispatchers
@@ -83,38 +82,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     // 常用字1000
                     PracticeBook(
                         name = "常用字1000",
-                        content = readRawTextFile(context, R.raw.basic_words_1000),
+                        content = readAssetsTextFile(context, "basic_words_1000.txt"),
                         isBuiltIn = true,
                         canRandomize = true
                     ),
                     // 常用字分畫數
                     PracticeBook(
                         name = "常用字1至6畫",
-                        content = readRawTextFile(context, R.raw.basic_words_01_to_06_strokes),
+                        content = readAssetsTextFile(context, "basic_words_01_to_06_strokes.txt"),
                         isBuiltIn = true,
                         canRandomize = true
                     ),
                     PracticeBook(
                         name = "常用字6至10畫",
-                        content = readRawTextFile(context, R.raw.basic_words_06_to_10_strokes),
+                        content = readAssetsTextFile(context, "basic_words_06_to_10_strokes.txt"),
                         isBuiltIn = true,
                         canRandomize = true
                     ),
                     PracticeBook(
                         name = "常用字10至15畫",
-                        content = readRawTextFile(context, R.raw.basic_words_10_to_15_strokes),
+                        content = readAssetsTextFile(context, "basic_words_10_to_15_strokes.txt"),
                         isBuiltIn = true,
                         canRandomize = true
                     ),
                     PracticeBook(
                         name = "常用字16至20畫",
-                        content = readRawTextFile(context, R.raw.basic_words_16_to_20_strokes),
+                        content = readAssetsTextFile(context, "basic_words_16_to_20_strokes.txt"),
                         isBuiltIn = true,
                         canRandomize = true
                     ),
                     PracticeBook(
                         name = "常用字21畫以上",
-                        content = readRawTextFile(context, R.raw.basic_words_over_21_strokes),
+                        content = readAssetsTextFile(context, "basic_words_over_21_strokes.txt"),
                         isBuiltIn = true,
                         canRandomize = true
                     )
@@ -125,10 +124,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // 新增輔助方法：讀取 raw 文字檔
-    private fun readRawTextFile(context: Application, resId: Int): String {
+    // 修改輔助方法：從assets讀取文字檔
+    private fun readAssetsTextFile(context: Application, fileName: String): String {
         return try {
-            context.resources.openRawResource(resId).bufferedReader(Charsets.UTF_8)
+            context.assets.open(fileName).bufferedReader(Charsets.UTF_8)
                 .use { it.readText() }
         } catch (e: Exception) {
             ""
@@ -259,8 +258,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val randomChars = withContext(Dispatchers.IO) {
-                    val inputStream =
-                        getApplication<Application>().resources.openRawResource(R.raw.word4k)
+                    val inputStream = getApplication<Application>().assets.open("word4k.tsv")
                     val reader = BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8))
                     val allCharacters = mutableSetOf<String>()
 

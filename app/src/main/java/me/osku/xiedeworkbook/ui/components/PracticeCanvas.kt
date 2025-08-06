@@ -94,13 +94,17 @@ fun PracticeCanvas(
             val availableWidth = size.width - (sideMargin * 2)
             val availableHeight = size.height - topMargin - bottomMargin
 
+            // 計算每個格子的實際寬度（包含注音格子）
+            val zhuyinWidth = if (settings.showZhuyin) gridSizePx * 0.25f else 0f
+            val gridWithZhuyinWidth = gridSizePx + zhuyinWidth
+
             // 對於中文直式排列：先計算列數（垂直方向），再計算行數（水平方向）
             val maxRows = if (availableHeight > 0) {
                 ((availableHeight + spacing) / (gridSizePx + spacing)).toInt().coerceAtLeast(1)
             } else 1
 
             val maxCols = if (availableWidth > 0) {
-                ((availableWidth + spacing) / (gridSizePx + spacing)).toInt().coerceAtLeast(1)
+                ((availableWidth + spacing) / (gridWithZhuyinWidth + spacing)).toInt().coerceAtLeast(1)
             } else 1
 
             val charsPerPage = maxRows * maxCols
@@ -290,7 +294,11 @@ private fun DrawScope.drawMultiCharacterGrid(
         (characters.size + maxRows - 1) / maxRows // 需要的列數
     } else 1
 
-    val totalWidth = maxCols * gridSize + (maxCols - 1) * spacing
+    // 計算注音格子寬度（如果啟用注音）
+    val zhuyinWidth = if (settings.showZhuyin) gridSize * 0.25f else 0f
+    val gridWithZhuyinWidth = gridSize + zhuyinWidth
+
+    val totalWidth = maxCols * gridWithZhuyinWidth + (maxCols - 1) * spacing
     val startX = (size.width - totalWidth) / 2
     val startY = 50.dp.toPx()
 
@@ -299,10 +307,10 @@ private fun DrawScope.drawMultiCharacterGrid(
         val col = index / maxRows  // 第幾列
         val row = index % maxRows  // 列內第幾個
 
-        val left = startX + col * (gridSize + spacing)
+        val left = startX + col * (gridWithZhuyinWidth + spacing)
         val top = startY + row * (gridSize + spacing)
 
-        // 繪製外框
+        // 繪製主格子外框
         drawRect(
             color = Color.Black,
             topLeft = Offset(left, top),
@@ -310,13 +318,37 @@ private fun DrawScope.drawMultiCharacterGrid(
             style = Stroke(width = 1.5.dp.toPx())
         )
 
-        // 繪製格線
+        // 繪製主格子格線
         drawGridLines(
             left = left,
             top = top,
             size = gridSize,
             style = settings.gridStyle
         )
+
+        // 繪製注音格子（如果啟用且字符不為空）
+        if (settings.showZhuyin && character.isNotEmpty() && zhuyinWidth > 0) {
+            val zhuyinLeft = left + gridSize
+
+            // 繪製注音格子外框
+            drawRect(
+                color = Color.Black,
+                topLeft = Offset(zhuyinLeft, top),
+                size = Size(zhuyinWidth, gridSize),
+                style = Stroke(width = 1.dp.toPx())
+            )
+
+            // 繪製注音
+            drawZhuyinInGrid(
+                character = character.firstOrNull() ?: ' ',
+                left = zhuyinLeft,
+                top = top,
+                width = zhuyinWidth,
+                height = gridSize,
+                textMeasurer = textMeasurer,
+                density = density
+            )
+        }
 
         // 繪製底字
         if (character.isNotEmpty()) {
@@ -472,7 +504,7 @@ private fun DrawScope.drawZhuyinInGrid(
         val textStyle = TextStyle(
             fontSize = (actualFontSize / density.density).sp,
             fontFamily = FontFamily.Default,
-            color = Color.Blue.copy(alpha = 0.8f)
+            color = Color.Black.copy(alpha = 0.8f)
         )
 
         // 測量文字尺寸，確保不會超出格子範圍
