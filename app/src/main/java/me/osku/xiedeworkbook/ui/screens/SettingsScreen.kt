@@ -141,6 +141,32 @@ fun SettingsScreen(
                     }
                 }
 
+                // 自動斷句模式設定（僅在多字模式下顯示）
+                if (!tempSettings.isSingleCharMode) {
+                    SettingItem(title = "自動斷句顯示") {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Switch(
+                                checked = tempSettings.isAutoSentenceMode,
+                                onCheckedChange = { tempSettings = tempSettings.copy(isAutoSentenceMode = it) }
+                            )
+                            Column {
+                                Text(
+                                    text = if (tempSettings.isAutoSentenceMode) "啟用自動斷句" else "關閉自動斷句",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "適用於詩詞等有標點符號的文本，每頁顯示一個句組",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // 注音顯示設定
                 SettingItem(title = "注音顯示") {
                     Row(

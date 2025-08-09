@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import me.osku.xiedeworkbook.ref.rememberDrawingState
 import me.osku.xiedeworkbook.ui.MainViewModel
 import me.osku.xiedeworkbook.ui.components.PracticeCanvas
+import me.osku.xiedeworkbook.ui.components.AutoSentenceCanvas
 import me.osku.xiedeworkbook.ui.components.LayoutInfo
 
 /**
@@ -62,10 +63,19 @@ fun PracticeScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     // 使用動態計算的頁面資訊
-                    val pageInfo = currentLayoutInfo?.let { layoutInfo ->
-                        val maxPages = viewModel.calculateMaxPages(layoutInfo.charsPerPage)
+                    val pageInfo = if (viewModel.practiceSettings.isAutoSentenceMode &&
+                                     currentBook.supportsAutoSentence &&
+                                     !viewModel.practiceSettings.isSingleCharMode) {
+                        // 自動斷句模式：每頁顯示一個句組
+                        val maxPages = currentBook.sentences.size
                         "${viewModel.currentPage + 1}/$maxPages"
-                    } ?: viewModel.currentPageInfo
+                    } else {
+                        // 一般模式的頁面資訊
+                        currentLayoutInfo?.let { layoutInfo ->
+                            val maxPages = viewModel.calculateMaxPages(layoutInfo.charsPerPage)
+                            "${viewModel.currentPage + 1}/$maxPages"
+                        } ?: viewModel.currentPageInfo
+                    }
 
                     Text(
                         text = pageInfo,
@@ -109,18 +119,26 @@ fun PracticeScreen(
             onSettings = { viewModel.showSettings() },
             canGoPrevious = viewModel.currentPage > 0,
             canGoNext = run {
-                currentLayoutInfo?.let { layoutInfo ->
-                    val maxPages = viewModel.calculateMaxPages(layoutInfo.charsPerPage)
-                    viewModel.currentPage < maxPages - 1
-                } ?: run {
-                    // 回退到估算邏輯
-                    val estimatedCharsPerPage = when {
-                        viewModel.practiceSettings.multiCharGridSize <= 80f -> 20
-                        viewModel.practiceSettings.multiCharGridSize <= 120f -> 12
-                        else -> 6
+                if (viewModel.practiceSettings.isAutoSentenceMode &&
+                    currentBook.supportsAutoSentence &&
+                    !viewModel.practiceSettings.isSingleCharMode) {
+                    // 自動斷句模式：檢查是否還有句組
+                    viewModel.currentPage < currentBook.sentences.size - 1
+                } else {
+                    // 一般模式的頁數計算
+                    currentLayoutInfo?.let { layoutInfo ->
+                        val maxPages = viewModel.calculateMaxPages(layoutInfo.charsPerPage)
+                        viewModel.currentPage < maxPages - 1
+                    } ?: run {
+                        // 回退到估算邏輯
+                        val estimatedCharsPerPage = when {
+                            viewModel.practiceSettings.multiCharGridSize <= 80f -> 20
+                            viewModel.practiceSettings.multiCharGridSize <= 120f -> 12
+                            else -> 6
+                        }
+                        val maxPages = viewModel.calculateMaxPages(estimatedCharsPerPage)
+                        viewModel.currentPage < maxPages - 1
                     }
-                    val maxPages = viewModel.calculateMaxPages(estimatedCharsPerPage)
-                    viewModel.currentPage < maxPages - 1
                 }
             },
             modifier = Modifier
@@ -135,16 +153,34 @@ fun PracticeScreen(
                 .weight(1f)
                 .padding(8.dp)
         ) {
-            PracticeCanvas(
-                modifier = Modifier.fillMaxSize(),
-                characters = currentBook.characters,
-                currentPage = viewModel.currentPage,
-                settings = viewModel.practiceSettings,
-                drawingState = drawingState,
-                onLayoutInfoChanged = { layoutInfo ->
-                    currentLayoutInfo = layoutInfo
-                }
-            )
+            // 根據設定選擇顯示模式
+            if (viewModel.practiceSettings.isAutoSentenceMode &&
+                currentBook.supportsAutoSentence &&
+                !viewModel.practiceSettings.isSingleCharMode) {
+                // 自動斷句模式：每頁顯示一個句組
+                val currentSentence = if (viewModel.currentPage < currentBook.sentences.size) {
+                    currentBook.sentences[viewModel.currentPage]
+                } else ""
+
+                AutoSentenceCanvas(
+                    modifier = Modifier.fillMaxSize(),
+                    sentence = currentSentence,
+                    settings = viewModel.practiceSettings,
+                    drawingState = drawingState
+                )
+            } else {
+                // 一般模式（單字模式或多字模式）
+                PracticeCanvas(
+                    modifier = Modifier.fillMaxSize(),
+                    characters = currentBook.characters,
+                    currentPage = viewModel.currentPage,
+                    settings = viewModel.practiceSettings,
+                    drawingState = drawingState,
+                    onLayoutInfoChanged = { layoutInfo ->
+                        currentLayoutInfo = layoutInfo
+                    }
+                )
+            }
         }
     }
 }
