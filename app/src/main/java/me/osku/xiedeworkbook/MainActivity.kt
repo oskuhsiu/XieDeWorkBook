@@ -87,6 +87,42 @@ fun XieDeWorkBookApp() {
         Screen.MY_BOOKS -> {
             ContentSelectionScreen(viewModel = viewModel, selectedTab = 1)
         }
+        Screen.POETRY_BOOKSHELF -> {
+            PoetryBookshelfScreen(viewModel = viewModel)
+        }
+        Screen.POEM_LIST -> {
+            viewModel.currentPoetryBook?.let { book ->
+                PoemListScreen(viewModel = viewModel, book = book)
+            } ?: run {
+                // 如果沒有選中的書籍，回到書庫
+                LaunchedEffect(Unit) {
+                    viewModel.navigateToScreen(Screen.POETRY_BOOKSHELF)
+                }
+                PoetryBookshelfScreen(viewModel = viewModel)
+            }
+        }
+        Screen.POEM_DETAIL -> {
+            viewModel.currentPoem?.let { poem ->
+                PoemDetailScreen(viewModel = viewModel, poem = poem)
+            } ?: run {
+                // 如果沒有選中的詩詞，回到列表
+                LaunchedEffect(Unit) {
+                    viewModel.navigateBack()
+                }
+                // 顯示空白畫面或載入畫面
+            }
+        }
+        Screen.POETRY_APPRECIATION -> {
+            viewModel.currentPoem?.let { poem ->
+                PoetryAppreciationScreen(viewModel = viewModel, poem = poem)
+            } ?: run {
+                // 如果沒有選中的詩詞，回到列表
+                LaunchedEffect(Unit) {
+                    viewModel.navigateBack()
+                }
+                // 顯示空白畫面或載入畫面
+            }
+        }
     }
 
     // 設定畫面覆蓋層

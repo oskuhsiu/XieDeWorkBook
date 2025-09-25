@@ -126,23 +126,6 @@ private fun ManualInputTab(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 隨機按鈕
-            Button(
-                onClick = { viewModel.generateRandomCharacters() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary
-                )
-            ) {
-                Text(
-                    text = "隨機",
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
-
             // 原有的按鈕區域
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -184,6 +167,23 @@ private fun ManualInputTab(
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
+            }
+
+            // 隨機按鈕
+            Button(
+                onClick = { viewModel.generateRandomCharacters() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            ) {
+                Text(
+                    text = "隨機",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
         }
 

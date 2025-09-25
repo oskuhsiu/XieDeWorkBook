@@ -63,9 +63,17 @@ fun PracticeScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     // 使用動態計算的頁面資訊
-                    val pageInfo = if (viewModel.practiceSettings.isAutoSentenceMode &&
-                                     currentBook.supportsAutoSentence &&
-                                     !viewModel.practiceSettings.isSingleCharMode) {
+                    val shouldUseAutoSentence = when {
+                        // 詩詞簿練習：強制使用自動斷句模式
+                        currentBook.name == "手動輸入" && currentBook.supportsAutoSentence -> true
+                        // 一般練習簿：依據設定
+                        viewModel.practiceSettings.isAutoSentenceMode &&
+                        currentBook.supportsAutoSentence &&
+                        !viewModel.practiceSettings.isSingleCharMode -> true
+                        else -> false
+                    }
+
+                    val pageInfo = if (shouldUseAutoSentence) {
                         // 自動斷句模式：每頁顯示一個句組
                         val maxPages = currentBook.sentences.size
                         "${viewModel.currentPage + 1}/$maxPages"
@@ -119,9 +127,18 @@ fun PracticeScreen(
             onSettings = { viewModel.showSettings() },
             canGoPrevious = viewModel.currentPage > 0,
             canGoNext = run {
-                if (viewModel.practiceSettings.isAutoSentenceMode &&
+                // 統一的邏輯判斷
+                val shouldUseAutoSentence = when {
+                    // 詩詞簿練習：強制使用自動斷句模式
+                    currentBook.name == "手動輸入" && currentBook.supportsAutoSentence -> true
+                    // 一般練習簿：依據設定
+                    viewModel.practiceSettings.isAutoSentenceMode &&
                     currentBook.supportsAutoSentence &&
-                    !viewModel.practiceSettings.isSingleCharMode) {
+                    !viewModel.practiceSettings.isSingleCharMode -> true
+                    else -> false
+                }
+
+                if (shouldUseAutoSentence) {
                     // 自動斷句模式：檢查是否還有句組
                     viewModel.currentPage < currentBook.sentences.size - 1
                 } else {
@@ -153,10 +170,18 @@ fun PracticeScreen(
                 .weight(1f)
                 .padding(8.dp)
         ) {
-            // 根據設定選擇顯示模式
-            if (viewModel.practiceSettings.isAutoSentenceMode &&
+            // 判斷是否使用自動斷句模式
+            val shouldUseAutoSentence = when {
+                // 詩詞簿練習：強制使用自動斷句模式，不依賴設定
+                currentBook.name == "手動輸入" && currentBook.supportsAutoSentence -> true
+                // 一般練習簿：依據設定和書籍支援度
+                viewModel.practiceSettings.isAutoSentenceMode &&
                 currentBook.supportsAutoSentence &&
-                !viewModel.practiceSettings.isSingleCharMode) {
+                !viewModel.practiceSettings.isSingleCharMode -> true
+                else -> false
+            }
+
+            if (shouldUseAutoSentence) {
                 // 自動斷句模式：每頁顯示一個句組
                 val currentSentence = if (viewModel.currentPage < currentBook.sentences.size) {
                     currentBook.sentences[viewModel.currentPage]

@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 /**
  * 主要的ViewModel，管理練習簿App的狀態（修復詩詞模式問題）
  */
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel_fixed(application: Application) : AndroidViewModel(application) {
 
     private val settingsRepository = SettingsRepository(application)
 
@@ -214,7 +214,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             PoetryMode.PRACTICE -> {
                 // 將詩詞轉換為練習簿格式
-                val practiceContent = poem.content//poem.sentences.joinToString("")
+                val practiceContent = poem.sentences.joinToString("")
                 startManualPractice(practiceContent)
             }
         }
@@ -408,7 +408,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 /**
  * 頁面枚舉
  */
-enum class Screen {
+enum class Screen_fixed {
     HOME,
     CONTENT_SELECTION,
     PRACTICE,

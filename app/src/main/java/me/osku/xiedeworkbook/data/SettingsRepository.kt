@@ -35,7 +35,8 @@ class SettingsRepository(private val context: Context) {
             } catch (e: Exception) {
                 GridStyle.RICE_GRID
             },
-            showZhuyin = prefs.getBoolean("show_zhuyin", false)
+            showZhuyin = prefs.getBoolean("show_zhuyin", false),
+            isAutoSentenceMode = prefs.getBoolean("is_auto_sentence_mode", false)
         )
     }
 
@@ -49,6 +50,7 @@ class SettingsRepository(private val context: Context) {
             putString("font_type", settings.fontType)
             putString("grid_style", settings.gridStyle.name)
             putBoolean("show_zhuyin", settings.showZhuyin)
+            putBoolean("is_auto_sentence_mode", settings.isAutoSentenceMode)
             apply()
         }
         _practiceSettings.value = settings
